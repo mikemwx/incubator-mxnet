@@ -1285,12 +1285,7 @@ def array(object, dtype=None, ctx=None):
             try:
                 object = _np.array(object, dtype=dtype)
             except Exception as e:
-<<<<<<< 96520cb77b7d3a1e89e84f946ac652c7a319e6a5
                 raise TypeError('{}'.format(str(e)))
-=======
-                print(e)
-                raise TypeError('source array must be an array like object')
->>>>>>> [numpy] Fix d2l chapter8 (#15237)
     ret = empty(object.shape, dtype=dtype, ctx=ctx)
     if len(object.shape) == 0:
         ret[()] = object
@@ -1720,7 +1715,6 @@ def expand_dims(a, axis):
         the input array.
     """
     return _npi.expand_dims(a, axis)
-<<<<<<< 96520cb77b7d3a1e89e84f946ac652c7a319e6a5
 
 
 @set_module('mxnet.numpy')
@@ -1796,5 +1790,3 @@ def tile(A, reps):
         The tiled output array.
     """
     return _npi.tile(A, reps)
-=======
->>>>>>> [numpy] Fix d2l chapter8 (#15237)
