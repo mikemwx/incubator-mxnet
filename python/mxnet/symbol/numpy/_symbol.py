@@ -30,8 +30,13 @@ from .._internal import _set_np_symbol_class
 from . import _internal as _npi
 
 __all__ = ['zeros', 'ones', 'maximum', 'minimum', 'stack', 'concatenate', 'arange', 'argmax',
+<<<<<<< 96520cb77b7d3a1e89e84f946ac652c7a319e6a5
            'clip', 'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'split', 'swapaxes',
            'expand_dims', 'tile']
+=======
+           'clip', 'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'swapaxes',
+           'expand_dims']
+>>>>>>> [numpy] Fix d2l chapter8 (#15237)
 
 
 def _num_outputs(sym):

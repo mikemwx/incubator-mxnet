@@ -539,7 +539,6 @@ def expand_dims(a, axis):
     """
     return _npi.expand_dims(a, axis)
 
-
 @set_module('mxnet.ndarray.numpy')
 def split(ary, indices_or_sections, axis=0):
     """Split an array into multiple sub-arrays.
