@@ -1285,7 +1285,12 @@ def array(object, dtype=None, ctx=None):
             try:
                 object = _np.array(object, dtype=dtype)
             except Exception as e:
+<<<<<<< HEAD
                 raise TypeError('{}'.format(str(e)))
+=======
+                print(e)
+                raise TypeError('source array must be an array like object')
+>>>>>>> 4c4c110... [numpy] Fix d2l chapter8 (#15237)
     ret = empty(object.shape, dtype=dtype, ctx=ctx)
     if len(object.shape) == 0:
         ret[()] = object
@@ -1715,7 +1720,6 @@ def expand_dims(a, axis):
         the input array.
     """
     return _npi.expand_dims(a, axis)
-
 
 @set_module('mxnet.numpy')
 def split(ary, indices_or_sections, axis=0):

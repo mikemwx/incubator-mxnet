@@ -1223,6 +1223,7 @@ def expand_dims(a, axis):
     return _npi.expand_dims(a, axis)
 
 
+<<<<<<< HEAD
 @set_module('mxnet.symbol.numpy')
 def split(ary, indices_or_sections, axis=0):
     """Split an array into multiple sub-arrays.
@@ -1307,4 +1308,6 @@ def tile(A, reps):
     return _npi.tile(A, reps)
 
 
+=======
+>>>>>>> 4c4c110... [numpy] Fix d2l chapter8 (#15237)
 _set_np_symbol_class(_Symbol)
