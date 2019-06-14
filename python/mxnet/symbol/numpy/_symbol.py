@@ -424,7 +424,7 @@ class _Symbol(Symbol):
 
         Notes
         -----
-        This function differs from the original `numpy.mean
+        This function differs from the original `numpy.argsort
         <https://docs.scipy.org/doc/numpy/reference/generated/numpy.argsort.html>`_ in
         the following way(s):
 
@@ -1348,6 +1348,7 @@ def argmax(a, axis=None, out=None):
     """
     return _npi.argmax(a, axis=axis, keepdims=False, out=out)
 
+
 @set_module('mxnet.symbol.numpy')
 def argsort(a, axis=-1, kind='quicksort', order=None):
     """
@@ -1357,16 +1358,49 @@ def argsort(a, axis=-1, kind='quicksort', order=None):
 
     Parameters
     ----------
-    a : ndarray
+    a : _Symbol
         Input array
     axis : int, optional
         The axis along which to sort teh input tensor.
         If not given, the last, dimension -1 will be used by default.
+        If None, the flattened array is used.
+    kind: {'quicksort'}
+        Currently not supported.
+    order: None
+        Currently not supported.
 
     Returns
     -------
-    output : ndarray of indicies that sort input array along the specified axis
-    Examples:
+    output : _Symbol
+        Array of indices that sort a along the specified axis.
+        If a is one-dimensional, a[index_array] yields a sorted a.
+        More generally, np.take_along_axis(a, index_array, axis=a) always yields the sorted a,
+        irrespective of dimensionality.
+
+    Examples
+    --------
+    >>> x = np.array([3, 1, 2])
+    >>> np.argsort(x)
+    array([1., 2., 0.])
+    >>> x = np.array([[0, 3], [2, 2]])
+    >>> x
+    array([[0., 3.],
+           [2., 2.]])
+    >>> np.argsort(x, axis=0)  # sorts along first axis (down)
+    array([[0., 1.],
+           [1., 0.]])
+    >>> np.argsort(x, axis=1)  # sorts along last axis (across)
+    array([[0., 1.],
+           [0., 1.]])
+
+    Notes
+    -----
+    This function differs from the original `numpy.argsort
+    <https://docs.scipy.org/doc/numpy/reference/generated/numpy.argsort.html>`_ in
+    the following way(s):
+
+    - kind and order is currently not supported
+
     """
     if kind != 'quicksort':
         raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
@@ -1374,7 +1408,7 @@ def argsort(a, axis=-1, kind='quicksort', order=None):
         raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
     return _npi.argsort(a, axis)
 
-    
+
 @set_module('mxnet.symbol.numpy')
 def argsort(a, axis=-1, kind='quicksort', order=None):
     """

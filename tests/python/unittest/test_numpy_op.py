@@ -1001,8 +1001,7 @@ def test_np_argsort():
         def __init__(self, axis=-1):
             super(TestArgsort, self).__init__()
             self._axis = axis
-            # necessary initializations
-            
+
         def hybrid_forward(self, F, a):
             return F.np.argsort(a, self._axis)
     
@@ -1015,8 +1014,7 @@ def test_np_argsort():
         (0,0,5),
         (0,0,0),
         (5,3,4)
-        ] 
-        # test_shapes, remember to include zero-dim shape and zero-size shapes
+    ] 
     for hybridize in [True, False]:
         for shape in shapes:
             for ax in list(range(len(shape))) + [-1, None]:
