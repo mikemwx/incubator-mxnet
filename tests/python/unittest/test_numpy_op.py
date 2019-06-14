@@ -806,7 +806,6 @@ def test_np_squeeze():
             assert same(ret_mx.asnumpy(), ret_np)
 
 
-<<<<<<< HEAD
 @with_seed()
 @npx.use_np_shape
 def test_np_split():
@@ -901,8 +900,6 @@ def test_np_tile():
             assert same(ret_mx.asnumpy(), ret_np)
 
 
-=======
->>>>>>> 4c4c110... [numpy] Fix d2l chapter8 (#15237)
 if __name__ == '__main__':
     import nose
     nose.runmodule()
