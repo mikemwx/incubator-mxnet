@@ -360,13 +360,20 @@ class _Symbol(Symbol):
         """
         raise AttributeError('_Symbol object has no attribute topk')
 
-    def argsort(self, *args, **kwargs):
+    def argsort(self, axis=-1, kind='quicksort',order=None):
         """Convenience fluent method for :py:func:`argsort`.
 
         The arguments are the same as for :py:func:`argsort`, with
         this array as data.
+        TODO
         """
-        raise NotImplementedError
+        #raise NotImplementedError
+        if kind != 'quicksort':
+            raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
+        if order != None:
+            raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
+        return _npi.argsort(self,axis)
+        
 
     def argmax_channel(self, *args, **kwargs):
         """Convenience fluent method for :py:func:`argmax_channel`.
