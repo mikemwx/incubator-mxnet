@@ -31,7 +31,7 @@ from . import _internal as _npi
 
 __all__ = ['zeros', 'ones', 'maximum', 'minimum', 'stack', 'concatenate', 'arange', 'argmax',
            'clip', 'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'swapaxes',
-           'expand_dims']
+           'expand_dims','argsort']
 
 
 def _num_outputs(sym):
@@ -1148,7 +1148,32 @@ def argmax(a, axis=None, out=None):
     """
     return _npi.argmax(a, axis=axis, keepdims=False, out=out)
 
+@set_module('mxnet.symbol.numpy')
+def argsort(a, axis=-1, kind='quicksort',order=None):
+    """
+    Returns the indices that would sort an input array along the given axis.
+    This function performs sorting along the given axis and returns an array 
+    of indices having same shape as an input array that index data in sorted order.
 
+    Parameters
+    ----------
+    a : ndarray
+        Input array
+    axis : int, optional
+        The axis along which to sort teh input tensor.
+        If not given, the last, dimension -1 will be used by default.
+
+    Returns
+    -------
+    output : ndarray of indicies that sort input array along the specified axis
+    Examples:
+    """
+    if kind != 'quicksort':
+        raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
+    if order != None:
+        raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
+    return _npi.argsort(a,axis)
+    
 @set_module('mxnet.symbol.numpy')
 def clip(a, a_min, a_max, out=None):
     """Clip (limit) the values in an array.
