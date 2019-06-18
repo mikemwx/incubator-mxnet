@@ -26,7 +26,7 @@ from . import _internal as _npi
 
 __all__ = ['zeros', 'ones', 'maximum', 'minimum', 'stack', 'arange', 'argmax',
            'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'concatenate',
-           'clip', 'split', 'swapaxes', 'expand_dims', 'tile']
+           'clip', 'split', 'swapaxes', 'expand_dims', 'tile', 'argsort']
 
 
 @set_module('mxnet.ndarray.numpy')
