@@ -45,7 +45,7 @@ from ..ndarray.numpy import _internal as _npi
 
 __all__ = ['ndarray', 'empty', 'array', 'zeros', 'ones', 'maximum', 'minimum', 'stack', 'arange',
            'argmax', 'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'concatenate',
-           'clip', 'swapaxes', 'expand_dims','argsort']
+           'clip', 'swapaxes', 'expand_dims', 'argsort']
 
 
 # This function is copied from ndarray.py since pylint
@@ -709,19 +709,17 @@ class ndarray(NDArray):
         """
         raise AttributeError('mxnet.numpy.ndarray object has no attribute topk')
 
-    def argsort(self, axis=-1, kind='quicksort',order=None):
+    def argsort(self, axis=-1, kind='quicksort', order=None):
         """Convenience fluent method for :py:func:`argsort`.
 
         The arguments are the same as for :py:func:`argsort`, with
         this array as data.
-        TODO
         """
-        # raise NotImplementedError
         if kind != 'quicksort':
             raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
-        if order != None:
+        if order is not None:
             raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
-        return _npi.argsort(self,axis)
+        return _npi.argsort(self, axis)
 
     def argmax_channel(self, *args, **kwargs):
         """Convenience fluent method for :py:func:`argmax_channel`.
@@ -1476,10 +1474,10 @@ def argmax(a, axis=None, out=None):
     return _mx_nd_np.argmax(a, axis, out)
 
 @set_module('mxnet.numpy')
-def argsort(a, axis=-1, kind='quicksort',order=None):
+def argsort(a, axis=-1, kind='quicksort', order=None):
     """
     Returns the indices that would sort an input array along the given axis.
-    This function performs sorting along the given axis and returns an array 
+    This function performs sorting along the given axis and returns an array
     of indices having same shape as an input array that index data in sorted order.
 
     Parameters
@@ -1497,9 +1495,9 @@ def argsort(a, axis=-1, kind='quicksort',order=None):
     """
     if kind != 'quicksort':
         raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
-    if order != None:
+    if order is not None:
         raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
-    return _npi.argsort(a,axis)
+    return _npi.argsort(a, axis)
 
 @set_module('mxnet.numpy')
 def concatenate(seq, axis=0, out=None):

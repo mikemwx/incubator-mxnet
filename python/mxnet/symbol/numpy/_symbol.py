@@ -31,7 +31,7 @@ from . import _internal as _npi
 
 __all__ = ['zeros', 'ones', 'maximum', 'minimum', 'stack', 'concatenate', 'arange', 'argmax',
            'clip', 'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'swapaxes',
-           'expand_dims','argsort']
+           'expand_dims', 'argsort']
 
 
 def _num_outputs(sym):
@@ -359,20 +359,17 @@ class _Symbol(Symbol):
         """
         raise AttributeError('_Symbol object has no attribute topk')
 
-    def argsort(self, axis=-1, kind='quicksort',order=None):
+    def argsort(self, axis=-1, kind='quicksort', order=None):
         """Convenience fluent method for :py:func:`argsort`.
 
         The arguments are the same as for :py:func:`argsort`, with
         this array as data.
-        TODO
         """
-        #raise NotImplementedError
         if kind != 'quicksort':
             raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
-        if order != None:
+        if order is not None:
             raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
-        return _npi.argsort(self,axis)
-        
+        return _npi.argsort(self, axis)
 
     def argmax_channel(self, *args, **kwargs):
         """Convenience fluent method for :py:func:`argmax_channel`.
@@ -1149,10 +1146,10 @@ def argmax(a, axis=None, out=None):
     return _npi.argmax(a, axis=axis, keepdims=False, out=out)
 
 @set_module('mxnet.symbol.numpy')
-def argsort(a, axis=-1, kind='quicksort',order=None):
+def argsort(a, axis=-1, kind='quicksort', order=None):
     """
     Returns the indices that would sort an input array along the given axis.
-    This function performs sorting along the given axis and returns an array 
+    This function performs sorting along the given axis and returns an array
     of indices having same shape as an input array that index data in sorted order.
 
     Parameters
@@ -1170,10 +1167,10 @@ def argsort(a, axis=-1, kind='quicksort',order=None):
     """
     if kind != 'quicksort':
         raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
-    if order != None:
+    if order is not None:
         raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
-    return _npi.argsort(a,axis)
-    
+    return _npi.argsort(a, axis)
+
 @set_module('mxnet.symbol.numpy')
 def clip(a, a_min, a_max, out=None):
     """Clip (limit) the values in an array.
