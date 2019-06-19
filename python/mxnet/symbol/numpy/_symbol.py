@@ -1141,6 +1141,7 @@ def argmax(a, axis=None, out=None):
     """
     return _npi.argmax(a, axis=axis, keepdims=False, out=out)
 
+
 @set_module('mxnet.symbol.numpy')
 def argsort(a, axis=-1, kind='quicksort', order=None):
     """
@@ -1166,6 +1167,7 @@ def argsort(a, axis=-1, kind='quicksort', order=None):
     if order is not None:
         raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
     return _npi.argsort(a, axis)
+
 
 @set_module('mxnet.symbol.numpy')
 def clip(a, a_min, a_max, out=None):

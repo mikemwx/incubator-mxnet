@@ -623,8 +623,7 @@ def test_np_argsort():
         def __init__(self, axis=-1):
             super(TestArgsort, self).__init__()
             self._axis = axis
-            # necessary initializations
-            
+
         def hybrid_forward(self, F, a):
             return F.np.argsort(a, self._axis)
     

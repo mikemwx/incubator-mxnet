@@ -1470,6 +1470,7 @@ def argmax(a, axis=None, out=None):
     """
     return _mx_nd_np.argmax(a, axis, out)
 
+
 @set_module('mxnet.numpy')
 def argsort(a, axis=-1, kind='quicksort', order=None):
     """
@@ -1495,6 +1496,7 @@ def argsort(a, axis=-1, kind='quicksort', order=None):
     if order is not None:
         raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
     return _npi.argsort(a, axis)
+
 
 @set_module('mxnet.numpy')
 def concatenate(seq, axis=0, out=None):
