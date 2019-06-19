@@ -360,7 +360,6 @@ class _Symbol(Symbol):
 
         The arguments are the same as for :py:func:`argsort`, with
         this array as data.
-        TODO
         """
         if kind != 'quicksort':
             raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
@@ -1144,6 +1143,7 @@ def argmax(a, axis=None, out=None):
 
 @set_module('mxnet.symbol.numpy')
 <<<<<<< HEAD
+<<<<<<< HEAD
 def argsort(a, axis=-1, kind='quicksort', order=None):
     """
     Returns the indices that would sort an input array along the given axis.
@@ -1154,6 +1154,12 @@ def argsort(a, axis=-1, kind='quicksort',order=None):
     Returns the indices that would sort an input array along the given axis.
     This function performs sorting along the given axis and returns an array 
 >>>>>>> 892a966... Add numpy compatible argsort to the mxnet.numpy
+=======
+def argsort(a, axis=-1, kind='quicksort', order=None):
+    """
+    Returns the indices that would sort an input array along the given axis.
+    This function performs sorting along the given axis and returns an array
+>>>>>>> e997302... Fix the code style issues of files changed for argsort
     of indices having same shape as an input array that index data in sorted order.
 
     Parameters
@@ -1185,10 +1191,10 @@ def argsort(a, axis=-1, kind='quicksort',order=None):
     """
     if kind != 'quicksort':
         raise AttributeError('mxnet.numpy.argsort does not support other sorting methods')
-    if order != None:
+    if order is not None:
         raise AttributeError('mxnet.numpy.argsort does not support sorting with fields ordering')
-    return _npi.argsort(a,axis)
-    
+    return _npi.argsort(a, axis)
+
 @set_module('mxnet.symbol.numpy')
 def clip(a, a_min, a_max, out=None):
     """Clip (limit) the values in an array.
