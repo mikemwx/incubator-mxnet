@@ -31,7 +31,7 @@ from . import _internal as _npi
 
 __all__ = ['zeros', 'ones', 'maximum', 'minimum', 'stack', 'concatenate', 'arange', 'argmax',
            'clip', 'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'split', 'swapaxes',
-           'expand_dims', 'tile', 'argsort']
+           'expand_dims', 'tile', 'argsort', 'hstack']
 
 
 def _num_outputs(sym):
@@ -355,7 +355,7 @@ class _Symbol(Symbol):
         """
         raise AttributeError('_Symbol object has no attribute topk')
 
-    def argsort(self, axis=-1, kind='quicksort', order=None):
+    def argsort(self, axis=-1, kind='quicksort', order=None):  # pylint: disable=arguments-differ
         """Convenience fluent method for :py:func:`argsort`.
 
         The arguments are the same as for :py:func:`argsort`, with
@@ -1062,16 +1062,7 @@ def hstack(arrays):
     -------
     stacked : ndarray
         The stacked array has one more dimension than the input arrays."""
-    axis = 1
-    if (arrays[0].ndim < 2):
-        axis = 0
-    arrays = list(arrays)
-    for i in range(len(arrays)):
-        if(arrays[i].ndim == 0):
-            arrays[i] = _npi.array((arrays[i],))
-    arrays = tuple(arrays)
-    print(arrays)
-    return _npi.concatenate(arrays, axis=axis, out=None)
+    return _npi.hstack(*arrays)
 
 
 @set_module('mxnet.symbol.numpy')

@@ -707,7 +707,7 @@ class ndarray(NDArray):
         """
         raise AttributeError('mxnet.numpy.ndarray object has no attribute topk')
 
-    def argsort(self, axis=-1, kind='quicksort', order=None):
+    def argsort(self, axis=-1, kind='quicksort', order=None):  # pylint: disable=arguments-differ
         """Convenience fluent method for :py:func:`argsort`.
 
         The arguments are the same as for :py:func:`argsort`, with
@@ -1429,16 +1429,16 @@ def hstack(arrays):
     -------
     stacked : ndarray
         The stacked array has one more dimension than the input arrays."""
-    axis = 1
-    if (arrays[0].ndim < 2):
-        axis = 0
-    arrays = list(arrays)
-    for i in range(len(arrays)):
-        if(arrays[i].ndim == 0):
-            arrays[i] = array((arrays[i],))
-    arrays = tuple(arrays)
-    print(arrays)
-    return _mx_nd_np.concatenate(arrays, axis=axis, out=None)
+    # axis = 1
+    # if (arrays[0].ndim < 2):
+    #     axis = 0
+    # arrays = list(arrays)
+    # for i in range(len(arrays)):
+    #     if(arrays[i].ndim == 0):
+    #         arrays[i] = array((arrays[i],))
+    # arrays = tuple(arrays)
+    # print(arrays)
+    return _npi.hstack(*arrays)
 
 @set_module('mxnet.numpy')
 def arange(start, stop=None, step=1, dtype=None, ctx=None):

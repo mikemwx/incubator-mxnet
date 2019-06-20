@@ -57,14 +57,6 @@ struct ConcatParam : public dmlc::Parameter<ConcatParam> {
   }
 };  // struct ConcatParam
 
-struct HStackParam : public dmlc::Parameter<HStackParam> {
-  int num_args;
-  DMLC_DECLARE_PARAMETER(ConcatParam) {
-    DMLC_DECLARE_FIELD(num_args).set_lower_bound(1)
-    .describe("Number of inputs to be concated.");
-  }
-};  // struct HStackParam
-
 template<typename xpu, typename DType>
 class ConcatOp {
  public:
@@ -154,34 +146,22 @@ void HStackCompute(const nnvm::NodeAttrs& attrs, const OpContext& ctx,
                    const std::vector<TBlob>& inputs,
                    const std::vector<OpReqType>& req,
                    const std::vector<TBlob>& outputs) {
-  const HStackParam & param = nnvm::get<HStackParam>(attrs.parsed);
+  ConcatParam param = nnvm::get<ConcatParam>(attrs.parsed);
+  param.dim = inputs[0].shape_.ndim() > 1 ? 1 : 0;
+  std::vector<TBlob> modified_inputs(inputs.size());
+  for (int i = 0; i < param.num_args; ++i) {
+    if (inputs[i].shape_.ndim() == 0) {
+      modified_inputs[i] = inputs[i].reshape(TShape(1, 1));
+    } else {
+      modified_inputs[i] = inputs[i];
+    }
+  }
   MSHADOW_TYPE_SWITCH(inputs[concat_enum::kData0].type_flag_, DType, {
     ConcatOp<xpu, DType> op;
     op.Init(param);
-    op.Forward(ctx, inputs, req, outputs);
+    op.Forward(ctx, modified_inputs, req, outputs);
   });
 }
-
-bool HStackShape(const nnvm::NodeAttrs& attrs,
-                 mxnet::ShapeVector *in_shape,
-                 mxnet::ShapeVector *out_shape) {
-  using namespace mshadow;
-  const HStackParam & param = nnvm::get<HStackParam>(attrs.parsed);
-  CHECK_EQ(in_shape->size(), static_cast<size_t>(param_.num_args));
-  mxnet::TShape dshape;
-  dim_t size = 0;
-  bool has_unknown_dim_size = false;
-  int axis = -1;
-  for (int i = 0; i < param_.num_args; ++i) {
-    mxnet::TShape tmp = (*in_shape)[i];
-    if (tmp.ndim() > 0) {
-      axis = CheckAxis(param_.dim, tmp.ndim());
-      has_unknown_dim_size = !mxnet::dim_size_is_known(tmp, axis) || has_unknown_dim_size;
-      size += tmp[axis];
-      tmp[axis] = -1;
-      shape_assign(&dshape, tmp);
-    }
-  }
 
 template<typename xpu>
 void ConcatGradCompute(const nnvm::NodeAttrs& attrs, const OpContext& ctx,
@@ -193,6 +173,28 @@ void ConcatGradCompute(const nnvm::NodeAttrs& attrs, const OpContext& ctx,
     ConcatOp<xpu, DType> op;
     op.Init(param);
     op.Backward(ctx, inputs[concat_enum::kOut], req, outputs);
+  });
+}
+
+template<typename xpu>
+void HStackGradCompute(const nnvm::NodeAttrs& attrs, const OpContext& ctx,
+                       const std::vector<TBlob>& inputs,
+                       const std::vector<OpReqType>& req,
+                       const std::vector<TBlob>& outputs) {
+  ConcatParam param = nnvm::get<ConcatParam>(attrs.parsed);
+  param.dim = inputs[0].shape_.ndim() > 1 ? 1 : 0;
+  std::vector<TBlob> modified_outputs(outputs.size());
+  for (int i = 0; i < param.num_args; ++i) {
+    if (outputs[i].shape_.ndim() == 0) {
+      modified_outputs[i] = outputs[i].reshape(TShape(1, 1));
+    } else {
+      modified_outputs[i] = outputs[i];
+    }
+  }
+  MSHADOW_TYPE_SWITCH(inputs[concat_enum::kOut].type_flag_, DType, {
+    ConcatOp<xpu, DType> op;
+    op.Init(param);
+    op.Backward(ctx, inputs[concat_enum::kOut], req, modified_outputs);
   });
 }
 

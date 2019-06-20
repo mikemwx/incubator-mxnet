@@ -26,7 +26,7 @@ from . import _internal as _npi
 
 __all__ = ['zeros', 'ones', 'maximum', 'minimum', 'stack', 'arange', 'argmax',
            'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'concatenate',
-           'clip', 'split', 'swapaxes', 'expand_dims', 'tile', 'argsort']
+           'clip', 'split', 'swapaxes', 'expand_dims', 'tile', 'argsort', 'hstack']
 
 
 @set_module('mxnet.ndarray.numpy')
@@ -331,6 +331,11 @@ def concatenate(seq, axis=0, out=None):
         The concatenated array.
     """
     return _npi.concatenate(*seq, dim=axis, out=out)
+
+
+@set_module('mxnet.ndarray.numpy')
+def hstack(arrays):
+    return _npi.hstack(*arrays)
 
 
 @set_module('mxnet.ndarray.numpy')
