@@ -45,7 +45,7 @@ from ..ndarray.numpy import _internal as _npi
 
 __all__ = ['ndarray', 'empty', 'array', 'zeros', 'ones', 'maximum', 'minimum', 'stack', 'arange',
            'argmax', 'add', 'subtract', 'multiply', 'divide', 'mod', 'power', 'concatenate',
-           'clip', 'split', 'swapaxes', 'expand_dims', 'tile', 'argsort']
+           'clip', 'split', 'swapaxes', 'expand_dims', 'tile', 'argsort', 'hstack']
 
 
 # This function is copied from ndarray.py since pylint
@@ -1407,6 +1407,38 @@ def stack(arrays, axis=0, out=None):
         The stacked array has one more dimension than the input arrays."""
     return _mx_nd_np.stack(arrays, axis=axis, out=out)
 
+
+@set_module('mxnet.numpy')
+def hstack(arrays):
+    """Join a sequence of arrays along a new axis.
+
+        The axis parameter specifies the index of the new axis in the dimensions of the result.
+        For example, if `axis=0` it will be the first dimension and if `axis=-1` it will be the last dimension.
+
+    Parameters
+    ----------
+    arrays : sequence of array_like
+        Each array must have the same shape.
+    axis : int, optional
+        The axis in the result array along which the input arrays are stacked.
+    out : ndarray, optional
+        If provided, the destination to place the result. The shape must be correct,
+        matching that of what stack would have returned if no out argument were specified.
+
+    Returns
+    -------
+    stacked : ndarray
+        The stacked array has one more dimension than the input arrays."""
+    axis = 1
+    if (arrays[0].ndim < 2):
+        axis = 0
+    arrays = list(arrays)
+    for i in range(len(arrays)):
+        if(arrays[i].ndim == 0):
+            arrays[i] = array((arrays[i],))
+    arrays = tuple(arrays)
+    print(arrays)
+    return _mx_nd_np.concatenate(arrays, axis=axis, out=None)
 
 @set_module('mxnet.numpy')
 def arange(start, stop=None, step=1, dtype=None, ctx=None):
