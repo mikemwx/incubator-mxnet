@@ -770,7 +770,7 @@ def test_np_hstack():
         (0,1,3),
         (2,0,3),
         (2,3,4,5)
-        ]
+    ]
     for hybridize in [True, False]:
         for shape in shapes:
             test_hstack = TestHStack()
@@ -783,12 +783,10 @@ def test_np_hstack():
             b.attach_grad()
             c = np.random.uniform(size=get_new_shape(shape))
             c.attach_grad()
-            c = np.random.uniform(size=get_new_shape(shape))
-            c.attach_grad()
             d = np.random.uniform(size=get_new_shape(shape))
             d.attach_grad()
             with mx.autograd.record():
-                mx_out = test_hstack(a,b,c,d)
+                mx_out = test_hstack(a, b, c, d)
             np_out = _np.hstack((a.asnumpy(), b.asnumpy(), c.asnumpy(), d.asnumpy()))
             assert mx_out.shape == np_out.shape
             assert_almost_equal(mx_out.asnumpy(), np_out, rtol=1e-3, atol=1e-5)
@@ -799,6 +797,7 @@ def test_np_hstack():
             assert_almost_equal(b.grad.asnumpy(), _np.ones(b.shape), rtol=1e-3, atol=1e-5)
             assert_almost_equal(c.grad.asnumpy(), _np.ones(c.shape), rtol=1e-3, atol=1e-5)
             assert_almost_equal(d.grad.asnumpy(), _np.ones(d.shape), rtol=1e-3, atol=1e-5)
+
             # test imperative
             mx_out = np.hstack((a, b, c, d))
             np_out = _np.hstack((a.asnumpy(),b.asnumpy(), c.asnumpy(), d.asnumpy()))

@@ -1428,17 +1428,10 @@ def hstack(arrays):
     Returns
     -------
     stacked : ndarray
-        The stacked array has one more dimension than the input arrays."""
-    # axis = 1
-    # if (arrays[0].ndim < 2):
-    #     axis = 0
-    # arrays = list(arrays)
-    # for i in range(len(arrays)):
-    #     if(arrays[i].ndim == 0):
-    #         arrays[i] = array((arrays[i],))
-    # arrays = tuple(arrays)
-    # print(arrays)
+        The stacked array has one more dimension than the input arrays.
+    """
     return _npi.hstack(*arrays)
+
 
 @set_module('mxnet.numpy')
 def arange(start, stop=None, step=1, dtype=None, ctx=None):

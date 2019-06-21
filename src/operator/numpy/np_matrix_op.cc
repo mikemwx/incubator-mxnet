@@ -364,7 +364,6 @@ NNVM_REGISTER_OP(_backward_np_concat)
 .set_attr<nnvm::TIsBackward>("TIsBackward", true)
 .set_attr<FCompute>("FCompute<cpu>", ConcatGradCompute<cpu>);
 
-
 NNVM_REGISTER_OP(_npi_hstack)
 .describe(R"code(Stack tensors horizontally (in second dimension))code" ADD_FILELINE)
 .set_num_inputs([](const NodeAttrs& attrs) {
@@ -393,7 +392,6 @@ NNVM_REGISTER_OP(_npi_hstack)
 .set_attr<nnvm::FGradient>("FGradient", NumpyConcatGrad{"_backward_np_hstack"})
 .add_argument("data", "NDArray-or-Symbol[]", "List of arrays to concatenate")
 .add_arguments(ConcatParam::__FIELDS__());
-
 
 NNVM_REGISTER_OP(_backward_np_hstack)
 .set_num_outputs([](const NodeAttrs& attrs) {
