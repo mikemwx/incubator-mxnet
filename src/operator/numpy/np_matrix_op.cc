@@ -113,81 +113,7 @@ Examples::
 .add_argument("a", "NDArray-or-Symbol", "Source input")
 .add_arguments(NumpyTransposeParam::__FIELDS__());
 
-struct NumpyReshapeParam : public dmlc::Parameter<NumpyReshapeParam> {
-  mxnet::TShape newshape;
-  std::string order;
-  DMLC_DECLARE_PARAMETER(NumpyReshapeParam) {
-      DMLC_DECLARE_FIELD(newshape)
-          .describe("The new shape should be compatible with the original shape."
-                    " If an integer, then the result will be a 1-D array of that length."
-                    " One shape dimension can be -1. In this case, the value is inferred"
-                    " from the length of the array and remaining dimensions.");
-      DMLC_DECLARE_FIELD(order)
-      .set_default("C")
-      .describe("Read the elements of a using this index order, and place the elements into"
-                " the reshaped array using this index order. 'C' means to read/write the elements"
-                " using C-like index order, with the last axis index changing fastest, back to the"
-                " first axis index changing slowest. Note that currently only C-like order is"
-                " supported");
-  }
-};
-
 DMLC_REGISTER_PARAMETER(NumpyReshapeParam);
-
-bool NumpyReshapeInferShape(const mxnet::TShape& src, mxnet::TShape* dst) {
-  if (shape_is_known(src) && shape_is_known(*dst)) {
-    CHECK_EQ(src.Size(), dst->Size()) << "Cannot reshape array of size "
-                                      << src.Size() << " into shape " << *dst;
-    return true;
-  } else if (!shape_is_known(src) || !ndim_is_known(*dst)) {
-    return false;
-  } else {
-    int unknown_axis = -1;
-    dim_t known_dim_size_prod = 1;
-    for (int i = 0; i < dst->ndim(); ++i) {
-      if (!dim_size_is_known(*dst, i)) {
-        if (unknown_axis == -1) {
-          unknown_axis = i;
-        } else {
-          return false;  // more than one unknown dim
-        }
-      } else {
-        known_dim_size_prod *= (*dst)[i];
-      }
-    }
-    CHECK_NE(known_dim_size_prod, 0) << "Cannot reshape array of size "
-                                     << src.Size() << " into shape " << *dst;
-    CHECK_EQ(src.Size() % known_dim_size_prod, 0) << "Cannot reshape array of size "
-                                                  << src.Size() << " into shape " << *dst;
-    (*dst)[unknown_axis] = src.Size() / known_dim_size_prod;
-    return true;
-  }
-}
-
-bool NumpyReshapeShape(const nnvm::NodeAttrs& attrs,
-                       mxnet::ShapeVector* in_attrs,
-                       mxnet::ShapeVector* out_attrs) {
-  CHECK_EQ(in_attrs->size(), 1U) << "Input: [data]";
-  CHECK_EQ(out_attrs->size(), 1U);
-  const NumpyReshapeParam& param = nnvm::get<NumpyReshapeParam>(attrs.parsed);
-  // sanity check
-  bool has_unknown_dim_size = false;
-  for (int i = 0; i < param.newshape.ndim(); ++i) {
-    if (param.newshape[i] < 0) {
-      CHECK_EQ(param.newshape[i], -1) << "The shape dimension size to inferred must be -1";
-      CHECK(!has_unknown_dim_size) << "Can only specify one unknown dimension";
-      has_unknown_dim_size = true;
-    }
-  }
-
-  mxnet::TShape target_shape = param.newshape;
-  bool success = NumpyReshapeInferShape(in_attrs->at(0), &target_shape);
-  SHAPE_ASSIGN_CHECK(*out_attrs, 0, target_shape);
-  if (!success) {
-    success = NumpyReshapeInferShape(out_attrs->at(0), &in_attrs->at(0));
-  }
-  return success;
-}
 
 NNVM_REGISTER_OP(_np_reshape)
 .describe(R"code()code" ADD_FILELINE)
@@ -212,6 +138,33 @@ NNVM_REGISTER_OP(_np_reshape)
   })
 .add_argument("a", "NDArray-or-Symbol", "Array to be reshaped.")
 .add_arguments(NumpyReshapeParam::__FIELDS__());
+
+DMLC_REGISTER_PARAMETER(NumpyXReshapeParam);
+
+NNVM_REGISTER_OP(_npx_reshape)
+.add_alias("_npi_reshape")
+.describe(R"code()code" ADD_FILELINE)
+.set_num_inputs(1)
+.set_num_outputs(1)
+.set_attr_parser(ParamParser<NumpyXReshapeParam>)
+.set_attr<mxnet::FInferShape>("FInferShape", NumpyXReshapeShape)
+.set_attr<nnvm::FInferType>("FInferType", ElemwiseType<1, 1>)
+.set_attr<nnvm::FGradient>("FGradient", ElemwiseGradUseNone{"_backward_reshape"})
+.set_attr<FCompute>("FCompute<cpu>", UnaryOp::IdentityCompute<cpu>)
+.set_attr<nnvm::FInplaceOption>("FInplaceOption",
+  [](const NodeAttrs& attrs) {
+    return std::vector<std::pair<int, int> >{{0, 0}};
+  })
+.set_attr<nnvm::FInplaceIdentity>("FInplaceIdentity",
+  [](const NodeAttrs& attrs){
+    return std::vector<bool>{true};
+  })
+.set_attr<nnvm::FListInputNames>("FListInputNames",
+  [](const NodeAttrs& attrs) {
+    return std::vector<std::string>{"a"};
+  })
+.add_argument("a", "NDArray-or-Symbol", "Array to be reshaped.")
+.add_arguments(NumpyXReshapeParam::__FIELDS__());
 
 NNVM_REGISTER_OP(_npi_stack)
 .describe(R"code(Join a sequence of arrays along a new axis.
@@ -372,6 +325,122 @@ NNVM_REGISTER_OP(_np_squeeze)
 .set_attr<nnvm::FGradient>("FGradient", ElemwiseGradUseNone{"_backward_squeeze"})
 .add_argument("a", "NDArray-or-Symbol[]", "data to squeeze")
 .add_arguments(SqueezeParam::__FIELDS__());
+
+DMLC_REGISTER_PARAMETER(NumpyXSliceParam);
+
+NNVM_REGISTER_OP(_npx_slice)
+.add_alias("_npi_slice")
+// MXNET_ADD_SPARSE_OP_ALIAS(slice)
+.describe(R"code(Slices a region of the array.
+
+.. note:: ``crop`` is deprecated. Use ``slice`` instead.
+
+This function returns a sliced array between the indices given
+by `begin` and `end` with the corresponding `step`.
+
+For an input array of ``shape=(d_0, d_1, ..., d_n-1)``,
+slice operation with ``begin=(b_0, b_1...b_m-1)``,
+``end=(e_0, e_1, ..., e_m-1)``, and ``step=(s_0, s_1, ..., s_m-1)``,
+where m <= n, results in an array with the shape
+``(|e_0-b_0|/|s_0|, ..., |e_m-1-b_m-1|/|s_m-1|, d_m, ..., d_n-1)``.
+
+The resulting array's *k*-th dimension contains elements
+from the *k*-th dimension of the input array starting
+from index ``b_k`` (inclusive) with step ``s_k``
+until reaching ``e_k`` (exclusive).
+
+If the *k*-th elements are `None` in the sequence of `begin`, `end`,
+and `step`, the following rule will be used to set default values.
+If `s_k` is `None`, set `s_k=1`. If `s_k > 0`, set `b_k=0`, `e_k=d_k`;
+else, set `b_k=d_k-1`, `e_k=-1`.
+
+The storage type of ``slice`` output depends on storage types of inputs
+
+- slice(csr) = csr
+- otherwise, ``slice`` generates output with default storage
+
+.. note:: When input data storage type is csr, it only supports
+   step=(), or step=(None,), or step=(1,) to generate a csr output.
+   For other step parameter values, it falls back to slicing
+   a dense tensor.
+
+Example::
+
+  x = [[  1.,   2.,   3.,   4.],
+       [  5.,   6.,   7.,   8.],
+       [  9.,  10.,  11.,  12.]]
+
+  slice(x, begin=(0,1), end=(2,4)) = [[ 2.,  3.,  4.],
+                                     [ 6.,  7.,  8.]]
+  slice(x, begin=(None, 0), end=(None, 3), step=(-1, 2)) = [[9., 11.],
+                                                            [5.,  7.],
+                                                            [1.,  3.]]
+)code" ADD_FILELINE)
+.set_attr_parser(ParamParser<NumpyXSliceParam>)
+.set_attr<mxnet::FInferShape>("FInferShape", NumpyXSliceOpShape)
+.set_attr<nnvm::FInferType>("FInferType", ElemwiseType<1, 1>)
+.set_attr<FResourceRequest>("FResourceRequest",
+  [](const NodeAttrs& attrs) {
+    return std::vector<ResourceRequest>{ResourceRequest::kTempSpace};
+})
+// .set_attr<FInferStorageType>("FInferStorageType", SliceForwardInferStorageType)
+.set_attr<nnvm::FGradient>("FGradient", ElemwiseGradUseNone{"_backward_npx_slice"})
+.set_attr<FCompute>("FCompute<cpu>", NumpyXSliceOpForward<cpu>)
+#if MXNET_USE_MKLDNN == 1
+.set_attr<bool>("TIsMKLDNN", true)
+#endif
+.add_argument("data", "NDArray-or-Symbol", "Source input")
+.add_arguments(NumpyXSliceParam::__FIELDS__());
+
+NNVM_REGISTER_OP(_backward_npx_slice)
+.set_attr_parser(ParamParser<NumpyXSliceParam>)
+.set_attr<nnvm::TIsBackward>("TIsBackward", true)
+.set_attr<FCompute>("FCompute<cpu>", NumpyXSliceOpBackward<cpu>);
+
+NNVM_REGISTER_OP(_npx_slice_assign)
+.add_alias("_npi_slice_assign")
+.MXNET_DESCRIBE("Assign the rhs to a cropped subset of lhs.\n\n"
+"Requirements\n"
+"------------\n"
+"- output should be explicitly given and be the same as lhs.\n"
+"- lhs and rhs are of the same data type, and on the same device.\n")
+.set_num_inputs(2)
+.set_num_outputs(1)
+.set_attr<nnvm::FListInputNames>("FListInputNames",
+  [](const NodeAttrs& attrs) {
+    return std::vector<std::string>{"lhs", "rhs"};
+  })
+.set_attr_parser(ParamParser<NumpyXSliceParam>)
+.set_attr<mxnet::FInferShape>("FInferShape", NumpyXSliceAssignOpShape)
+.set_attr<nnvm::FInferType>("FInferType", ElemwiseType<2, 1>)
+.set_attr<nnvm::FInplaceOption>("FInplaceOption",
+  [](const NodeAttrs& attrs){
+    return std::vector<std::pair<int, int> >{{0, 0}};
+  })
+.set_attr<FCompute>("FCompute<cpu>", NumpyXSliceAssignOpForward<cpu>)
+.add_argument("lhs", "NDArray-or-Symbol", "Source input")
+.add_argument("rhs", "NDArray-or-Symbol", "value to assign")
+.add_arguments(SliceParam::__FIELDS__());
+
+NNVM_REGISTER_OP(_npx_slice_assign_scalar)
+.add_alias("_npi_slice_assign_scalar")
+.MXNET_DESCRIBE("(Assign the scalar to a cropped subset of the input.\n\n"
+"Requirements\n"
+"------------\n"
+"- output should be explicitly given and be the same as input\n"
+")")
+.set_num_inputs(1)
+.set_num_outputs(1)
+.set_attr_parser(ParamParser<SliceAssignScalarParam>)
+.set_attr<mxnet::FInferShape>("FInferShape", SliceAssignScalarOpShape)
+.set_attr<nnvm::FInferType>("FInferType", ElemwiseType<1, 1>)
+.set_attr<nnvm::FInplaceOption>("FInplaceOption",
+  [](const NodeAttrs& attrs){
+    return std::vector<std::pair<int, int> >{{0, 0}};
+  })
+.set_attr<FCompute>("FCompute<cpu>", NumpyXSliceAssignScalarOpForward<cpu>)
+.add_argument("data", "NDArray-or-Symbol", "Source input")
+.add_arguments(SliceAssignScalarParam::__FIELDS__());
 
 }  // namespace op
 }  // namespace mxnet
