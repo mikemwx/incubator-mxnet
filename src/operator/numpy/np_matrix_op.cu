@@ -52,5 +52,12 @@ NNVM_REGISTER_OP(_backward_np_hstack)
 NNVM_REGISTER_OP(_np_squeeze)
 .set_attr<FCompute>("FCompute<gpu>", UnaryOp::IdentityCompute<gpu>);
 
+NNVM_REGISTER_OP(_npx_slice)
+.add_alias("_npi_slice")
+.set_attr<FCompute>("FCompute<gpu>", NumpyXSliceOpForward<gpu>);
+
+NNVM_REGISTER_OP(_backward_npx_slice)
+.set_attr<FCompute>("FCompute<gpu>", NumpyXSliceOpBackward<gpu>);
+
 }  // namespace op
 }  // namespace mxnet
