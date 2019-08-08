@@ -48,3 +48,15 @@ def vadd_gpu(dtype, ndim):
     s[C].bind(bx, tvm.thread_axis("blockIdx.x"))
     s[C].bind(tx, tvm.thread_axis("threadIdx.x"))
     return s, [A, B, C]
+
+@defop(name="relu", target="cpu", auto_broadcast=False,
+       dtype=["float32"], ndim=list(range(1, 6)))
+def relu(dtype, ndim):
+    A = tvm.placeholder([tvm.var() for _ in range(ndim)], name='A', dtype=dtype)
+    B = tvm.compute([tvm.var() for _ in range(ndim)],
+                     lambda *index: tvm.if_then_else(A[index] > 0.0, A[index], 0.0), name='B') 
+    s = tvm.create_schedule(B.op)
+    axes = [axis for axis in B.op.axis]
+    fused = s[B].fuse(*axes)
+    s[B].parallel(fused)
+    return s, [A, B]

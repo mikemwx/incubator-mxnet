@@ -37,6 +37,7 @@ namespace op {
 
 static constexpr char func_vadd_cpu[] = "vadd";
 static constexpr char func_vadd_gpu[] = "cuda_vadd";
+static constexpr char func_relu_cpu[] = "relu";
 
 template<const char* func>
 void TVMBroadcastCompute(const nnvm::NodeAttrs& attrs,
@@ -49,6 +50,17 @@ void TVMBroadcastCompute(const nnvm::NodeAttrs& attrs,
   tvm::runtime::TVMOpModule::Get()->Call(func, ctx, {inputs[0], inputs[1], outputs[0]});
 }
 
+template<const char* func>
+void TVMReluCompute(const nnvm::NodeAttrs& attrs,
+                         const mxnet::OpContext& ctx,
+                         const std::vector<TBlob>& inputs,
+                         const std::vector<OpReqType>& req,
+                         const std::vector<TBlob>& outputs) {
+  CHECK_EQ(inputs.size(), 1U);
+  CHECK_EQ(outputs.size(), 1U);
+  tvm::runtime::TVMOpModule::Get()->Call(func, ctx, {inputs[0], outputs[0]});
+}
+
 NNVM_REGISTER_OP(_contrib_tvm_vadd)
     .set_num_inputs(2)
     .set_num_outputs(1)
@@ -59,6 +71,17 @@ NNVM_REGISTER_OP(_contrib_tvm_vadd)
     .set_attr<mxnet::FCompute>("FCompute<cpu>", mxnet::op::TVMBroadcastCompute<func_vadd_cpu>)
 #if MXNET_USE_CUDA
     .set_attr<mxnet::FCompute>("FCompute<gpu>", mxnet::op::TVMBroadcastCompute<func_vadd_gpu>);
+#else
+    ;
+
+NNVM_REGISTER_OP(_contrib_tvm_relu)
+    .set_num_inputs(1)
+    .set_num_outputs(1)
+    .add_argument("a", "NDArray-or-Symbol", "first input")
+    .set_attr<mxnet::FInferShape>("FInferShape", ElemwiseShape<1,1>)
+    .set_attr<nnvm::FInferType>("FInferType", mxnet::op::ElemwiseType<1, 1>)
+    .set_attr<mxnet::FCompute>("FCompute<cpu>", mxnet::op::TVMReluCompute<func_relu_cpu>);
+
 #endif  // MXNET_USE_CUDA
 
 }  // namespace op

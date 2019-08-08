@@ -29,6 +29,7 @@
 #include <tvm/runtime/c_runtime_api.h>
 #include <string>
 #include <vector>
+#include <chrono>
 #include "op_module.h"
 
 using namespace tvm::runtime;
@@ -47,6 +48,7 @@ void TVMOpModule::Load(const std::string &filepath) {
 PackedFunc GetFunction(const std::shared_ptr<Module> &module,
                        const std::string &op_name,
                        const std::vector<mxnet::TBlob> &args) {
+  // auto tic = std::chrono::high_resolution_clock::now();
   std::ostringstream func_name;
   func_name << op_name;
   for (const auto &arg : args) {
@@ -77,7 +79,12 @@ PackedFunc GetFunction(const std::shared_ptr<Module> &module,
     }
     func_name << "_" << arg.shape_.ndim();
   }
+  // PackedFunc r =  
   return module->GetFunction(func_name.str(), false);
+  // auto toc = std::chrono::high_resolution_clock::now();
+  // std::chrono::duration<double> elapsed = toc - tic;
+  // printf("%le\n", elapsed.count());
+  // return r;
 }
 
 void TVMOpModule::Call(const std::string &func_name,
